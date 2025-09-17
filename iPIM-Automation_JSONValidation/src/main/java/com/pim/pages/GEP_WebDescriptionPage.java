@@ -78,7 +78,9 @@ public class GEP_WebDescriptionPage extends BasePage {
 	private final By taskFilterIcon = By.xpath("//span[contains(@class,'v-menubar-menuitem v-menubar-menuitem-hpmw-filter')]");
 	private final By updatedTaskInRowFilter = By.xpath("//*[@id='task_table']/div[2]");
 	private final String locaAttributesValue = "//span[contains(text(),'${variable}')]/../../../td[3]/div/div/div[2]/div/div";
-	
+	//Technical Specification Description:
+	public By tsdTextField = By.xpath("(//span[contains(text(),'Technical Specification Description')]/ancestor:: tr//td[@class='v-formlayout-contentcell']//div)[7]");
+
 
 	//classification Code
 	private final By classificationCode = By.xpath("//span[contains(text(),'Classification')]/ancestor::td/following-sibling::td//div[@class='v-label v-widget hpmw-inline-textfield v-label-hpmw-inline-textfield v-has-width']");
@@ -272,5 +274,22 @@ public class GEP_WebDescriptionPage extends BasePage {
 		String selectedDivision = getAttributeValues(divisionTextfield, WaitLogic.VISIBLE, "selected division");
 		return selectedDivision;
 
+	}
+	public String getDetailedDescription() {
+		String detailedDescription = getStringValues(doedTextField, WaitLogic.VISIBLE, "get Detailed Description Value");
+		return detailedDescription.trim();
+	}
+	public String getTechnicalDescription() {
+		String technicalDescription = getStringValues(tsdTextField, WaitLogic.VISIBLE, "get Technical Description Value");
+		return technicalDescription.trim();
+	}
+	public String getPrintCatalogDescription() {
+		String catlogDescription = getStringValues(pcdTextField, WaitLogic.VISIBLE, "get Catalogdescription Value");
+		return catlogDescription.trim();
+	}
+
+	public String getExtendedWebDescription() {
+		String extendedWebDescription = getStringValues(ewdTextField, WaitLogic.VISIBLE, "get Extended Web Description Value");
+		return extendedWebDescription.trim();
 	}
 }

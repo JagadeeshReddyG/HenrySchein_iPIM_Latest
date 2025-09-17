@@ -755,7 +755,91 @@ public class JsonVerificationUtils {
 		}
 	}
 
+	public static String getGEP_Abbreviated_Displayed_Web_DescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> abbreviatedDesc = ctx.read("$.Descriptions[*].Abbreviated_Display_Description");
+		return abbreviatedDesc.isEmpty() ? null : abbreviatedDesc.get(0);
+	}
 
+	public static String getProductDescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> productDesc = ctx.read("$.Descriptions[*].Product_Description");
+		return productDesc.isEmpty() ? null : productDesc.get(0);
+	}
+
+	public static String getSearchDescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> searchDesc = ctx.read("$.Descriptions[*].Search_Description");
+		return searchDesc.isEmpty() ? null : searchDesc.get(0);
+	}
+
+	public static String getDetailDescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> detailDesc = ctx.read("$.Descriptions[*].['Detail Description']");
+		return detailDesc.isEmpty() ? null : detailDesc.get(0);
+	}
+
+	public static String getTechnicalDescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> technicalDesc = ctx.read("$.Descriptions[*].Technical_Description");
+		return technicalDesc.isEmpty() ? null : technicalDesc.get(0);
+	}
+	public static String getLookAheadSearchDescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> lookAheadSearchDesc = ctx.read("$.Descriptions[*].Look_Ahead_Search_Description");
+		return lookAheadSearchDesc.isEmpty() ? null : lookAheadSearchDesc.get(0);
+	}
+
+	public static String getExtendedWebDescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> extendedWebDesc = ctx.read("$.Descriptions[*].Extended_Web_Description");
+		return extendedWebDesc.isEmpty() ? null : extendedWebDesc.get(0);
+	}
+
+	public static String getPrintCatalogDescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> printCatalogDesc = ctx.read("$.Descriptions[*].Print_Catalog_Description");
+		return printCatalogDesc.isEmpty() ? null : printCatalogDesc.get(0);
+	}
+
+	public static List<String> getMediaURLFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> mediaURL = ctx.read("$.Media[*].URL");
+		return mediaURL.isEmpty() ? null : mediaURL;
+	}
+
+	public static List<String> getMediaMimeTypFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> mediaMimeType = ctx.read("$.Media[*].MIME_Type");
+		return mediaMimeType.isEmpty() ? null : mediaMimeType;
+	}
+	public static List<String> getDocumentIDFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> mediaDocumentId = ctx.read("$.Media[*].Document_Id");
+		return mediaDocumentId.isEmpty() ? null : mediaDocumentId;
+	}
 
 
 

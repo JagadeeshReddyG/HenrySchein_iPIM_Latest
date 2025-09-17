@@ -46,8 +46,15 @@ public class MediaSubMenu extends BasePage{
 	private final String assetDivInUsageList = "//td[@class='v-table-cell-content v-table-cell-content-ArticleType_SupplierAltAid']/div[contains(text(),'${variable}')]";
 	private final By usageList = By.xpath("//div[text()='Usage list']");
 	private final By getItemAssetName = By.xpath("//div[contains(text(), '.jpg')]");
-	
-	
+
+	//Media Tab
+	private final By fileNameTextField = By.xpath("(//span[contains(text(),'File-name')]/ancestor:: tr//td[@class='v-formlayout-contentcell']//div)[7]");
+	private final By shotTypeTextField = By.xpath("(//span[contains(text(),'Shot-Type')]/ancestor:: tr//td[@class='v-formlayout-contentcell']//div)[7]");
+	private final By serializationTextField = By.xpath("(//span[contains(text(),'Serialization')]/ancestor:: tr//td[@class='v-formlayout-contentcell']//div)[7]");
+	private final By imageInfoIcon = By.xpath("//button[contains(@class,'mediaOpenInfo')]");
+	private final By documentIdentificationNoInPopup = By.xpath("//*[contains(text(),'Document identifier')]//ancestor::tr//td[3]");
+	private final By resolutonValueInPopup = By.xpath("//*[contains(text(),'Resolution')]//ancestor::tr//td[3]");
+
 	
 	public MediaSubMenu selectMultiMediaDocument() {
 		pdp.waitUntilBufferingIconDisappear();
@@ -275,6 +282,24 @@ public class MediaSubMenu extends BasePage{
 	        System.out.println("Could not minimize product detail tab for doc ID: " + docId);
 	    }
 	    return this;
+	}
+	public String getFileNameFromMediaTab() {
+		String fileNameValue = getStringValues(fileNameTextField, WaitLogic.VISIBLE, "get File Name Value");
+		return fileNameValue.trim();
+	}
+
+	public String getSerializationValueFromMediaTab() {
+		String serializationValue = getStringValues(serializationTextField, WaitLogic.VISIBLE, "get Serialization Value");
+		return serializationValue.trim();
+	}
+
+	public String getShotTypeValueFromMediaTab() {
+		String shotTypeValue = getStringValues(shotTypeTextField, WaitLogic.VISIBLE, "get Serialization Value");
+		return shotTypeValue.trim();
+	}
+
+	public void clickImageInfoIconFromMediaTab() {
+		click(imageInfoIcon, WaitLogic.CLICKABLE, "Info Icon");
 	}
 
 	
