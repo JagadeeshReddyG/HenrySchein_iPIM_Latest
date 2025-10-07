@@ -302,5 +302,14 @@ public class MediaSubMenu extends BasePage{
 		click(imageInfoIcon, WaitLogic.CLICKABLE, "Info Icon");
 	}
 
+	public String getDocumentIdFromMediaTabInfoPopup() {
+		String documentIDInPopup = getStringValues(documentIdentificationNoInPopup, WaitLogic.VISIBLE, "get Document ID Value in Media Info Popup");
+		return documentIDInPopup.trim();
+	}
+
+	public String getResolutionDpiFromMediaTabInfoPopup() {
+		String resolutionDpiInPopup = getStringValues(resolutonValueInPopup, WaitLogic.VISIBLE, "get Resolution DPI Value in Media Info Popup");
+		return resolutionDpiInPopup.trim();
+	}
 	
 }

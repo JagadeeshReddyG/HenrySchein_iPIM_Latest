@@ -33,6 +33,9 @@ public class PricePage extends BasePage {
     private final By webPrice_ValidFrom= By.xpath("(//div[contains(text(),'Web Price')])[1]/..//following::td[4]/div");
     private final By webPrice_ValidTo= By.xpath("(//div[contains(text(),'Web Price')])[1]/..//following::td[5]/div");
 
+    private final By primaryListPrice_Currency = By.xpath("(//div[contains(text(),'Net customer price primary')])[1]/..//following::td[2]/div");
+    private final By primaryListPrice_ValidFrom= By.xpath("(//div[contains(text(),'Net customer price primary')])[1]/..//following::td[4]/div");
+    private final By primaryListPrice_ValidTo= By.xpath("(//div[contains(text(),'Net customer price primary')])[1]/..//following::td[5]/div");
 
 
     public PricePage sortPriceByValidFrom() {
@@ -91,6 +94,18 @@ public class PricePage extends BasePage {
         return divisionalPriceCust.trim();
     }
 
+    public String getPrimaryListPriceCurrency() {
+        String listPriceCurrency = getStringValues(primaryListPrice_Currency, WaitLogic.VISIBLE, "get Primary List Price Currency Value");
+        return listPriceCurrency.trim();
+    }
+    public String getPrimaryListPriceStartDate() {
+        String listPriceStartDate = getStringValues(primaryListPrice_ValidFrom, WaitLogic.VISIBLE, "get Primary List Price Start Date Value");
+        return listPriceStartDate.trim();
+    }
+    public String getPrimaryListPriceEndDate() {
+        String listPriceEndDate = getStringValues(primaryListPrice_ValidTo, WaitLogic.VISIBLE, "get Primary List Price End Date Value");
+        return listPriceEndDate.trim();
+    }
 
 
 }

@@ -968,5 +968,129 @@ public class JsonVerificationUtils {
 		return referenceTypes.stream().filter(type -> type != null && !type.trim().isEmpty()).map(String::trim).collect(Collectors.toList());
 	}
 
+	public static List<String> getDescriptionExtraHeaderFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return Collections.emptyList();
+		List<String> extraHeaders = new ArrayList<>();
+		Map<String, String> headerPaths = new LinkedHashMap<>();
+		headerPaths.put("Language_ISO_Code", "$.Descriptions[*].Language_ISO_Code");
+		for (Map.Entry<String, String> entry : headerPaths.entrySet()) {
+			try {
+				List<Object> values = ctx.read(entry.getValue());
+				if (values != null && !values.isEmpty()) {
+					extraHeaders.add(entry.getKey());
+				}
+			} catch (Exception ignored) {
+			}
+		}
+		return extraHeaders;
+	}
+
+
+	public static List<String> getMediaSequenceFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> mediaSequence = ctx.read("$.Media[*].Sequence");
+		return mediaSequence.isEmpty() ? null : mediaSequence;
+	}
+	public static List<String> getMediaFormatFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> mediaFormat = ctx.read("$.Media[*].Format");
+		return mediaFormat.isEmpty() ? null : mediaFormat;
+	}
+	public static List<String> getMediaDAMIdentifierFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> mediaDamIdentifier = ctx.read("$.Media[*].DAM_Identifer");
+		return mediaDamIdentifier.isEmpty() ? null : mediaDamIdentifier;
+	}
+	public static List<String> getMediaDescriptionFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> mediaDesc = ctx.read("$.Media[*].Description");
+		return mediaDesc.isEmpty() ? null : mediaDesc;
+	}
+	public static List<String> getMediaExtraHeaderFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return Collections.emptyList();
+		List<String> extraHeaders = new ArrayList<>();
+		Map<String, String> headerPaths = new LinkedHashMap<>();
+		headerPaths.put("Alternative_Text", "$.Media[*].Alternative_Text");
+		for (Map.Entry<String, String> entry : headerPaths.entrySet()) {
+			try {
+				List<Object> values = ctx.read(entry.getValue());
+				if (values != null && !values.isEmpty()) {
+					extraHeaders.add(entry.getKey());
+				}
+			} catch (Exception ignored) {
+			}
+		}
+		return extraHeaders;
+	}
+	public static String getListPriceCurrencyFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> listPriceCurrency = ctx.read("$.Prices[*].Currency");
+		if (listPriceCurrency == null || listPriceCurrency.isEmpty()) return null;
+		// Map the first currency found to ISO code
+		String jsonCurrency = listPriceCurrency.get(0);
+		return mapCurrencyToISO(jsonCurrency);
+	}
+
+	public static List<String> getPricesExtraHeadersFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return Collections.emptyList();
+		List<String> extraHeaders = new ArrayList<>();
+		Map<String, String> headerPaths = new LinkedHashMap<>();
+		headerPaths.put("UOM", "$.Prices[*].UOM");
+		headerPaths.put("Package_Quantity", "$.Prices[*].Package_Quantity");
+		headerPaths.put("MinQuantity", "$.Prices[*].MinQuantity");
+		for (Map.Entry<String, String> entry : headerPaths.entrySet()) {
+			try {
+				List<Object> values = ctx.read(entry.getValue());
+				if (values != null && !values.isEmpty()) {
+					extraHeaders.add(entry.getKey());
+				}
+			} catch (Exception ignored) {
+			}
+		}
+		return extraHeaders;
+	}
+	public static String getListPriceStartDateFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> listPriceStartdate = ctx.read("$.Prices[*].Start_Date");
+		return listPriceStartdate.isEmpty() ? null : mapDateToJsonFormat(listPriceStartdate.get(0));
+	}
+	public static String getListPriceEndDateFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		List<String> listPriceEnddate = ctx.read("$.Prices[*].End_Date");
+		return listPriceEnddate.isEmpty() ? null : mapDateToJsonFormat(listPriceEnddate.get(0));
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
         

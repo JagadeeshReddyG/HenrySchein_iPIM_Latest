@@ -32,6 +32,11 @@
 				<include name="verify_Divisional_Prices_JSON_Verification_US"></include>
 				<include name="verify_Competitor_Price_JSON_Verification_US"></include>
 				<include name="verify_Product_Reference_JSON_Verification_US"></include>
+
+				<include name="verify_Product_Description_JSON_Verification_US"/>
+				<include name="verify_Product_Media_JSON_Verification_US"/>
+				<include name="verify_ListPrices_JSON_Verification_US"/>
+
 			</methods>
 			</class>
         </classes>
