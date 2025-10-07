@@ -3,7 +3,6 @@ package com.pim.tests.Workflow;
 import com.ipim.page.iPimMainPage;
 import com.pim.annotations.PimFrameworkAnnotation;
 import com.pim.annotations.TestDataSheet;
-import com.pim.constants.Constants;
 import com.pim.driver.Driver;
 import com.pim.driver.DriverManager;
 import com.pim.enums.CategoryType;
@@ -19,7 +18,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -47,6 +45,7 @@ public class iPIM_JSON_Verification extends BaseTest {
 	AllCatalogsPage allCatalogsPage = new AllCatalogsPage();
 	Javautils javautil = new Javautils();
 	MediaSubMenu mediaTab = new MediaSubMenu();
+	ReferencesPage referencePage = new ReferencesPage();
 
 
 
@@ -727,12 +726,12 @@ public class iPIM_JSON_Verification extends BaseTest {
 
 
 
-	//Prices : Web Prices, Divisional Prices
+	//Prices : Web Prices
 	@PimFrameworkAnnotation(module = Modules.JSON_Verification_PIM, category = CategoryType.REGRESSION)
 	@TestDataSheet(sheetname = TestCaseSheet.Json_Verification)
-	@Test(description = "iPIM_Prices_Headers | Validate that field names WebPrices, from Master Catalog are correctly reflected in iPIM JSON for US region", dataProvider = "getCatalogData", groups = {
+	@Test(description = "iPIM_Web_Prices_Headers | Validate that field names WebPrices from Master Catalog are correctly reflected in iPIM JSON for US region", dataProvider = "getCatalogData", groups = {
 			"REGRESSION", "US", "Prices" }, dataProviderClass = DataProviderUtils.class)
-	public void verify_Prices_JSON_Verification_US(Map<String, String> map) throws InterruptedException {
+	public void verify_Web_Prices_JSON_Verification_US(Map<String, String> map) throws InterruptedException {
 
 
 		PimHomepage pimHomepage = new LoginPage()
@@ -759,27 +758,13 @@ public class iPIM_JSON_Verification extends BaseTest {
 		log(LogType.EXTENTANDCONSOLE, "Master Catalog Web Price Currency of Item is: [" + master_Web_PriceCurrency + "]");
 		//System.out.println("Web Price Currency " + master_Web_PriceCurrency);
 
-		//-- Divisional Prices
-		String master_Divisional_Price = pricePage.getDivisionalPrice();
-		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price of Item is: [" + master_Divisional_Price + "]");
-		System.out.println("Divisional Price "+master_Divisional_Price);
+		String master_WebPriceStartDate = pricePage.getWebPriceStartDate();
+		log(LogType.EXTENTANDCONSOLE, "Master Catalog Web Price Start Date of Item is: [" + master_WebPriceStartDate + "]");
+		System.out.println("master_WebPriceStartDate: " + master_WebPriceStartDate);
 
-		String master_Divisional_PriceCurrency = pricePage.getDivisionalPriceCurrency();
-		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price Currency of Item is: [" + master_Divisional_PriceCurrency + "]");
-		System.out.println("Divisional Price Currency " + master_Divisional_PriceCurrency);
-
-		String master_DivisionalPriceStartDate = pricePage.getDivisionalPriceStartDate();
-		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price Start Date of Item is: [" + master_DivisionalPriceStartDate + "]");
-		System.out.println("master_DivisionalPriceStartDate: " + master_DivisionalPriceStartDate);
-
-		String master_DivisionalPriceEndDate = pricePage.getDivisionalPriceEndDate();
-		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price EndDate of Item is: [" + master_DivisionalPriceEndDate + "]");
-		System.out.println("master_DivisionalPriceEndDate: " + master_DivisionalPriceEndDate);
-
-		String master_DivisionalPriceCustomer = pricePage.getDivisionalPricCustomer();
-		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price Customer of Item is: [" + master_DivisionalPriceCustomer + "]");
-		System.out.println("master_DivisionalPriceCustomer: " + master_DivisionalPriceCustomer);
-
+		String master_WebPriceEndDate = pricePage.getWebPriceEndDate();
+		log(LogType.EXTENTANDCONSOLE, "Master Catalog Web Price EndDate of Item is: [" + master_WebPriceEndDate + "]");
+		System.out.println("master_WebPriceEndDate: " + master_WebPriceEndDate);
 
 		pimHomepage.clickLogoutButton();
 
@@ -797,58 +782,51 @@ public class iPIM_JSON_Verification extends BaseTest {
 				log(LogType.EXTENTANDCONSOLE, "No Web Price in this record, checking next...");
 			}
 
+
+			// --- Validate Web Price Start Date
+			String jsonWebPriceStartDate = JsonVerificationUtils.getWebPriceStartDateFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+			if (jsonWebPriceStartDate != null && !jsonWebPriceStartDate.isEmpty()) {
+				// normalize date format between UI (MM/dd/yyyy) and JSON (yyyy-MM-dd HH:mm:ss)
+				String mappedStartDate = JsonVerificationUtils.mapDateToJsonFormat(master_WebPriceStartDate);
+				Assertions.assertThat(jsonWebPriceStartDate).startsWith(mappedStartDate);
+				log(LogType.EXTENTANDCONSOLE, "Web Price Start Date Found on IPIM: [" + jsonWebPriceStartDate + "]");
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No Web Price Start Date in this record, checking next...");
+			}
+
+
+			// --- Validate Web Price End Date
+			String jsonWebPriceEndDate = JsonVerificationUtils.getWebPriceEndDateFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+			if (jsonWebPriceEndDate != null && !jsonWebPriceEndDate.isEmpty()) {
+				String mappedEndDate = JsonVerificationUtils.mapDateToJsonFormat(master_WebPriceEndDate);
+				Assertions.assertThat(jsonWebPriceEndDate).startsWith(mappedEndDate);
+				log(LogType.EXTENTANDCONSOLE, "Web Price End Date Found on IPIM: [" + jsonWebPriceEndDate + "]");
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No Web Price End Date in this record, checking next...");
+			}
+
+
+			//-- Validate Extra Web Price Headers (UOM, Package Quantity, Min Quantity)
+			List<String> jsonWebPriceExtraHeaders = JsonVerificationUtils.getWebPriceExtraHeadersFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+
+			if (!jsonWebPriceExtraHeaders.isEmpty()) {
+				Assertions.assertThat(jsonWebPriceExtraHeaders).containsExactlyInAnyOrder("UOM","Package_Quantity", "MinQuantity");
+				log(LogType.EXTENTANDCONSOLE, "Extra Web Price headers found on IPIM: " + jsonWebPriceExtraHeaders);
+
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No extra Web Price headers (UOM, Package_Quantity, MinQuantity) found in this record.");
+			}
+
+
 			// --- Validate Web Price Currency
 			String jsonWebPriceCurrency = JsonVerificationUtils.getWebPriceCurrencyFromIPIM_Json(jsonContext, map.get("ItemNumber"));
 			if (jsonWebPriceCurrency != null && !jsonWebPriceCurrency.isEmpty()) {
 				String mappedUICurrency = JsonVerificationUtils.mapCurrencyToISO(master_Web_PriceCurrency);
 				Assertions.assertThat(jsonWebPriceCurrency).isEqualTo(mappedUICurrency);
 				log(LogType.EXTENTANDCONSOLE, "Web Price Currency Found on IPIM: [" + jsonWebPriceCurrency + "]");
-				//return true;
-			} else {
-				log(LogType.EXTENTANDCONSOLE, "No Web Price Currency in this record, checking next...");
-			}
-
-			//--- Validate Divisional Price
-			List<String> jsonDivisionalPrice = JsonVerificationUtils.getDivisionalPricesFromIPIM_Json(jsonContext, map.get("ItemNumber"));
-			if (jsonDivisionalPrice != null && !jsonDivisionalPrice.isEmpty()) {
-				//Assert jsonDivisionalPrice with all Master Div price
-				Assertions.assertThat(jsonDivisionalPrice).contains(master_Divisional_Price);
-				log(LogType.EXTENTANDCONSOLE, "Divisional Price Found on IPIM:" + jsonDivisionalPrice);
-			} else {
-				log(LogType.EXTENTANDCONSOLE, "No Divisional Price in this record, checking next...");
-			}
-
-			// --- Validate Divisional Price Currency
-			String jsonDivisionalPriceCurrency = JsonVerificationUtils.getDivisionalPriceCurrencyFromIPIM_Json(jsonContext, map.get("ItemNumber"));
-			if (jsonDivisionalPriceCurrency != null && !jsonDivisionalPriceCurrency.isEmpty()) {
-				String mappedUICurrency = JsonVerificationUtils.mapCurrencyToISO(master_Divisional_PriceCurrency);
-				Assertions.assertThat(jsonDivisionalPriceCurrency).isEqualTo(mappedUICurrency);
-				log(LogType.EXTENTANDCONSOLE, "Divisional Price Currency Found on IPIM: [" + jsonDivisionalPriceCurrency + "]");
-
-			} else {
-				log(LogType.EXTENTANDCONSOLE, "No Divisional Price Currency in this record, checking next...");
-			}
-
-			//-- Validate Extra Divisional Price Headers (UOM, Package Quantity, Min Quantity)
-			List<String> jsonDivisionalPriceExtraHeaders = JsonVerificationUtils.getDivisonalExtraHeadersFromIPIM_Json(jsonContext, map.get("ItemNumber"));
-
-			if (!jsonDivisionalPriceExtraHeaders.isEmpty()) {
-				Assertions.assertThat(jsonDivisionalPriceExtraHeaders).containsExactlyInAnyOrder("UOM", "Package_Quantity", "MinQuantity");
-				log(LogType.EXTENTANDCONSOLE, "Extra Divisional Price headers found on IPIM: " + jsonDivisionalPriceExtraHeaders);
-
-			} else {
-				log(LogType.EXTENTANDCONSOLE, "No extra Divisional Price headers (UOM, Package_Quantity, MinQuantity) found in this record.");
-			}
-
-			//--- Validate Divisional Price Division
-			List<String> jsonDivisionalPriceDivision = JsonVerificationUtils.getDivisionalPricesDivisionFromIPIM_Json(jsonContext, map.get("ItemNumber"));
-			if (jsonDivisionalPriceDivision != null && !jsonDivisionalPriceDivision.isEmpty()) {
-				//Assert jsonDivisionalPriceDivision with all Master Div price Division
-				Assertions.assertThat(jsonDivisionalPriceDivision).contains(master_DivisionalPriceCustomer);
-				log(LogType.EXTENTANDCONSOLE, "Divisional Price Division Found on IPIM:" + jsonDivisionalPriceDivision);
 				return true;
 			} else {
-				log(LogType.EXTENTANDCONSOLE, "No Divisional Price Division in this record, checking next...");
+				log(LogType.EXTENTANDCONSOLE, "No Web Price Currency in this record, checking next...");
 			}
 
 			return false;
@@ -861,7 +839,7 @@ public class iPIM_JSON_Verification extends BaseTest {
 	//Competitor Price
 	@PimFrameworkAnnotation(module = Modules.JSON_Verification_PIM, category = CategoryType.REGRESSION)
 	@TestDataSheet(sheetname = TestCaseSheet.Json_Verification)
-	@Test(description = "iPIM_DESCRIPTIONS_MEDIA_PRICES_Headers | Validate that field names (Product Notes, GEP Web Description, Item Media, List Price) from Master Catalog are correctly reflected in iPIM JSON for US region", dataProvider = "getCatalogData", groups = {
+	@Test(description = "iPIM_COMPETITOR PRICE_Headers | Validate that field names COMPETITOR PRICE from Master Catalog are correctly reflected in iPIM JSON for US region", dataProvider = "getCatalogData", groups = {
 			"REGRESSION", "US", "Prices" }, dataProviderClass = DataProviderUtils.class)
 	public void verify_Competitor_Price_JSON_Verification_US(Map<String, String> map) throws InterruptedException {
 
@@ -932,6 +910,111 @@ public class iPIM_JSON_Verification extends BaseTest {
 		});
 
 	}
+
+	//--------------------------------------------------------------------------------------------------------------
+	//Prices : Divisional Prices
+	@PimFrameworkAnnotation(module = Modules.JSON_Verification_PIM, category = CategoryType.REGRESSION)
+	@TestDataSheet(sheetname = TestCaseSheet.Json_Verification)
+	@Test(description = "iPIM_Divisional_Prices_Headers | Validate that field names Divisional Prices from Master Catalog are correctly reflected in iPIM JSON for US region", dataProvider = "getCatalogData", groups = {
+			"REGRESSION", "US", "Prices" }, dataProviderClass = DataProviderUtils.class)
+	public void verify_Divisional_Prices_JSON_Verification_US(Map<String, String> map) throws InterruptedException {
+
+
+		PimHomepage pimHomepage = new LoginPage()
+				.enterUserName(ExcelUtils.getLoginData().get("US User").get("UserName"))
+				.enterPassword(ExcelUtils.getLoginData().get("US User").get("Password"))
+				.clickLoginButton();
+
+		pimHomepage.mainMenu().clickQueriesMenu()
+				.selectItemType(map.get("ItemType"))
+				.selectCatalogType(map.get("MasterCatalog"))
+				.enterHsiItemNumber(map.get("ItemNumber"))
+				.clickSeachButton();
+		productDetailSearchPage.clickOnFirstResult();
+
+		//-- WebPrices
+		// -- Get & Store WebPrice from Price tab
+		productDetailSearchPage.selectTabfromDropdown(map.get("tabName"));
+		productDetailSearchPage.maximizeProductDetailTab();
+		pricePage.sortPriceByValidFrom();
+
+		//-- Divisional Prices
+		String master_Divisional_Price = pricePage.getDivisionalPrice();
+		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price of Item is: [" + master_Divisional_Price + "]");
+		System.out.println("Divisional Price "+master_Divisional_Price);
+
+		String master_Divisional_PriceCurrency = pricePage.getDivisionalPriceCurrency();
+		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price Currency of Item is: [" + master_Divisional_PriceCurrency + "]");
+		System.out.println("Divisional Price Currency " + master_Divisional_PriceCurrency);
+
+		String master_DivisionalPriceStartDate = pricePage.getDivisionalPriceStartDate();
+		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price Start Date of Item is: [" + master_DivisionalPriceStartDate + "]");
+		System.out.println("master_DivisionalPriceStartDate: " + master_DivisionalPriceStartDate);
+
+		String master_DivisionalPriceEndDate = pricePage.getDivisionalPriceEndDate();
+		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price EndDate of Item is: [" + master_DivisionalPriceEndDate + "]");
+		System.out.println("master_DivisionalPriceEndDate: " + master_DivisionalPriceEndDate);
+
+		String master_DivisionalPriceCustomer = pricePage.getDivisionalPricCustomer();
+		log(LogType.EXTENTANDCONSOLE, "Master Catalog Divisional Price Customer of Item is: [" + master_DivisionalPriceCustomer + "]");
+		System.out.println("master_DivisionalPriceCustomer: " + master_DivisionalPriceCustomer);
+
+
+		pimHomepage.clickLogoutButton();
+
+		// Reuse common method
+		verifyJsonForItem(map, (jsonContext, rowTime) -> {
+
+
+			//--- Validate Divisional Price
+			List<String> jsonDivisionalPrice = JsonVerificationUtils.getDivisionalPricesFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+			if (jsonDivisionalPrice != null && !jsonDivisionalPrice.isEmpty()) {
+				//Assert jsonDivisionalPrice with all Master Div price
+				Assertions.assertThat(jsonDivisionalPrice).contains(master_Divisional_Price);
+				log(LogType.EXTENTANDCONSOLE, "Divisional Price Found on IPIM:" + jsonDivisionalPrice);
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No Divisional Price in this record, checking next...");
+			}
+
+			// --- Validate Divisional Price Currency
+			String jsonDivisionalPriceCurrency = JsonVerificationUtils.getDivisionalPriceCurrencyFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+			if (jsonDivisionalPriceCurrency != null && !jsonDivisionalPriceCurrency.isEmpty()) {
+				String mappedUICurrency = JsonVerificationUtils.mapCurrencyToISO(master_Divisional_PriceCurrency);
+				Assertions.assertThat(jsonDivisionalPriceCurrency).isEqualTo(mappedUICurrency);
+				log(LogType.EXTENTANDCONSOLE, "Divisional Price Currency Found on IPIM: [" + jsonDivisionalPriceCurrency + "]");
+
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No Divisional Price Currency in this record, checking next...");
+			}
+
+			//-- Validate Extra Divisional Price Headers (UOM, Package Quantity, Min Quantity)
+			List<String> jsonDivisionalPriceExtraHeaders = JsonVerificationUtils.getDivisonalExtraHeadersFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+
+			if (!jsonDivisionalPriceExtraHeaders.isEmpty()) {
+				Assertions.assertThat(jsonDivisionalPriceExtraHeaders).containsExactlyInAnyOrder("UOM", "Package_Quantity", "MinQuantity");
+				log(LogType.EXTENTANDCONSOLE, "Extra Divisional Price headers found on IPIM: " + jsonDivisionalPriceExtraHeaders);
+
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No extra Divisional Price headers (UOM, Package_Quantity, MinQuantity) found in this record.");
+			}
+
+			//--- Validate Divisional Price Division
+			List<String> jsonDivisionalPriceDivision = JsonVerificationUtils.getDivisionalPricesDivisionFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+			if (jsonDivisionalPriceDivision != null && !jsonDivisionalPriceDivision.isEmpty()) {
+				//Assert jsonDivisionalPriceDivision with all Master Div price Division
+				Assertions.assertThat(jsonDivisionalPriceDivision).contains(master_DivisionalPriceCustomer);
+				log(LogType.EXTENTANDCONSOLE, "Divisional Price Division Found on IPIM:" + jsonDivisionalPriceDivision);
+				return true;
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No Divisional Price Division in this record, checking next...");
+			}
+
+			return false;
+		});
+
+	}
+
+	//
 
 	//Prices
 	@PimFrameworkAnnotation(module = Modules.JSON_Verification_PIM, category = CategoryType.REGRESSION)
@@ -1060,7 +1143,7 @@ public class iPIM_JSON_Verification extends BaseTest {
 	}
 
 
-	//ProductDescription JSON Verification US
+	//Product Description
 	@PimFrameworkAnnotation(module = Modules.JSON_Verification_PIM, category = CategoryType.REGRESSION)
 	@TestDataSheet(sheetname = TestCaseSheet.Json_Verification)
 	@Test(description = "iPIM_DESCRIPTIONS_Headers | Validate that field names (Abbreviated Display Description, Detail Description, Search Description, Technical Description) from Master Catalog are correctly reflected in iPIM JSON for US region", dataProvider = "getCatalogData", groups = {
@@ -1220,7 +1303,7 @@ public class iPIM_JSON_Verification extends BaseTest {
 
 	}
 
-	//ProductDescription JSON Verification US
+	//Media
 	@PimFrameworkAnnotation(module = Modules.JSON_Verification_PIM, category = CategoryType.REGRESSION)
 	@TestDataSheet(sheetname = TestCaseSheet.Json_Verification)
 	@Test(description = "iPIM_MEDIA_Headers | Validate that field names (URL, Sequence, DocumentId) from Master Catalog are correctly reflected in iPIM JSON for US region", dataProvider = "getCatalogData", groups = {
@@ -1327,6 +1410,96 @@ public class iPIM_JSON_Verification extends BaseTest {
 				log(LogType.EXTENTANDCONSOLE, "No GEP Product Document IDs in this record, "+jsonGepDocumentIDs+" checking next...");
 			}
 			return false; // only hits here if neither attributes matched
+		});
+
+	}
+
+
+
+	//References (Product_References)
+	@PimFrameworkAnnotation(module = Modules.JSON_Verification_PIM, category = CategoryType.REGRESSION)
+	@TestDataSheet(sheetname = TestCaseSheet.Json_Verification)
+	@Test(description = "iPIM_PRODUCT_REFERENCES_Headers | Validate that field names PRODUCT REFERENCES(Target Product Id,Reference Type) from Master Catalog are correctly reflected in iPIM JSON for US region", dataProvider = "getCatalogData", groups = {
+			"REGRESSION", "US", "Prices" }, dataProviderClass = DataProviderUtils.class)
+	public void verify_Product_Reference_JSON_Verification_US(Map<String, String> map) throws InterruptedException {
+
+		PimHomepage pimHomepage = new LoginPage()
+				.enterUserName(ExcelUtils.getLoginData().get("US User").get("UserName"))
+				.enterPassword(ExcelUtils.getLoginData().get("US User").get("Password"))
+				.clickLoginButton();
+
+		pimHomepage.mainMenu().clickQueriesMenu()
+				.selectItemType(map.get("ItemType"))
+				.selectCatalogType(map.get("MasterCatalog"))
+				.enterHsiItemNumber(map.get("ItemNumber"))
+				.clickSeachButton();
+		productDetailSearchPage.clickOnFirstResult();
+
+		//-- References (Product_References)
+		// -- Get & Store Referenced object number from References tab
+		productDetailSearchPage.selectTabfromDropdown(map.get("tabName"));
+		productDetailSearchPage.maximizeProductDetailTab();
+
+
+//		String saRefNumber=referencePage.getSAObjNum();
+//		System.out.println("saRefNumber"+saRefNumber);
+
+
+		List<String> saRefNumber=referencePage.getAllObjNumbers();
+		System.out.println("saRefNumber"+saRefNumber);
+		//BasePage.WaitForMiliSec(2000);
+		log(LogType.EXTENTANDCONSOLE, "Master Reference Number for the  Item is: " + saRefNumber + "");
+
+//		String saRefType=referencePage.getReferenceTypeAsSA();
+//		System.out.println("saRefType "+saRefType);
+
+		List<String> saRefType=referencePage.getAllReferenceTypes();
+		System.out.println("saRefType "+saRefType);
+		//BasePage.WaitForMiliSec(2000);
+		log(LogType.EXTENTANDCONSOLE, "Master Reference Type for the  Item is: " + saRefType + "");
+
+
+
+		pimHomepage.clickLogoutButton();
+
+		// Reuse common method
+		verifyJsonForItem(map, (jsonContext, rowTime) -> {
+			//Validate References ID
+			List <String> jsonReferenceProductID = JsonVerificationUtils.getProductReferencesIDFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+			if (jsonReferenceProductID != null && !jsonReferenceProductID.isEmpty()) {
+				//Assert json ReferenceProductID with Master References ID
+				Assertions.assertThat(saRefNumber).containsAll(jsonReferenceProductID);
+				log(LogType.EXTENTANDCONSOLE, "Reference ID Found on IPIM: " + jsonReferenceProductID + "");
+
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No Reference ID in this record, checking next...");
+			}
+
+			//Validate References Type
+			List <String> jsonReferenceType = JsonVerificationUtils.getProductReferencesTypeFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+			if (jsonReferenceType != null && !jsonReferenceType.isEmpty()) {
+				//Assert json ReferenceType with Master ReferenceType
+				Assertions.assertThat(saRefType).containsAll(jsonReferenceType);
+				log(LogType.EXTENTANDCONSOLE, "Reference Type Found on IPIM: " + jsonReferenceType + "");
+
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No Reference Type in this record, checking next...");
+			}
+
+
+			//-- Validate Extra Headers (References )
+			List<String> jsonReferencesExtraHeaders = JsonVerificationUtils.getReferencesExtraHeadersFromIPIM_Json(jsonContext, map.get("ItemNumber"));
+
+			if (!jsonReferencesExtraHeaders.isEmpty()) {
+				Assertions.assertThat(jsonReferencesExtraHeaders).containsExactlyInAnyOrder("Effective_Date","Expiration_Date","Sequence");
+				log(LogType.EXTENTANDCONSOLE, "Extra References headers found on IPIM: " + jsonReferencesExtraHeaders);
+				return true;
+			} else {
+				log(LogType.EXTENTANDCONSOLE, "No extra References headers (Effective_Date,Expiration_Date,Sequence) found in this record.");
+			}
+
+
+			return false;
 		});
 
 	}

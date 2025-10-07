@@ -61,6 +61,10 @@ public class ReferencesPage extends BasePage {
 	private final By yesButton = By.xpath("(//div[@role='button' and @class='v-button v-widget'])[1]");
 	private final By referenceDropDown = By.xpath("//td[@class='gwt-MenuItem gwt-MenuItem-selected']//span");
 
+	private final By reference_SA_objectnumber = By.xpath("//td[@class='v-table-cell-content v-table-cell-content-ReferenceType']/descendant::div[text()='SA']/ancestor::td/following-sibling::td[@class='v-table-cell-content v-table-cell-content-ReferencedSupplierAid']/div");
+
+	private final String allReference_ObjectNumbers = ("//td[@class='v-table-cell-content v-table-cell-content-ReferencedSupplierAid']/div");
+	private final String allReference_Types = ("(//td[@class='v-table-cell-content v-table-cell-content-ReferenceType'])/div");
 	// getting reference type
 	public String getReferenceType() {
 		String text = getStringValues(referenceType, WaitLogic.VISIBLE, "get reference type");
@@ -245,5 +249,32 @@ public class ReferencesPage extends BasePage {
 	public String getReferenceTypeAsSA() {
 		String text = getStringValues(referenceTypeAsSA, WaitLogic.VISIBLE, "get reference type As SA");
 		return text;
+	}
+	public String getSAObjNum()
+	{
+		String text = getStringValues(reference_SA_objectnumber, WaitLogic.VISIBLE, "get SA Referenced object number");
+		return text;
+	}
+	public List<String> getAllObjNumbers() {
+		List<WebElement> elements = getElementsList(allReference_ObjectNumbers);
+		List<String> saNumbers = new ArrayList<>();
+		for (WebElement el : elements) {
+			String text = el.getText().trim();
+			if (!text.isEmpty()) {
+				saNumbers.add(text);
+			}
+		}
+		return saNumbers;
+	}
+	public List<String> getAllReferenceTypes() {
+		List<WebElement> elements = getElementsList(allReference_Types);
+		List<String> saNumbers = new ArrayList<>();
+		for (WebElement el : elements) {
+			String text = el.getText().trim();
+			if (!text.isEmpty()) {
+				saNumbers.add(text);
+			}
+		}
+		return saNumbers;
 	}
 }

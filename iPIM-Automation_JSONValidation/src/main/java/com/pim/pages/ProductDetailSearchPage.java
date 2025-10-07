@@ -26,7 +26,7 @@ public class ProductDetailSearchPage extends BasePage {
 	private final By dropdownbuttonfortab = By.xpath(
 			"//button[@class='v-nativebutton v-widget hpmw-tab-navigation-menubar v-nativebutton-hpmw-tab-navigation-menubar']");
 	private final By tabnameSearchTextbox = By.xpath("//div[@class='v-slot v-slot-hpmw-tab-search-input']//input");
-	private final String tabSearchxpath = "//span[normalize-space()='${variable}']";
+	private final String tabSearchxpath = "//div[@role='tree']//span[normalize-space()='${variable}']";
 	private final By filterIcon = By
 			.xpath("//span[@class='v-menubar-menuitem v-menubar-menuitem-hpmw-search v-menubar-menuitem-unchecked']");
 

@@ -30,6 +30,9 @@ public class PricePage extends BasePage {
     private final By divisionalPrice_ValidTo= By.xpath("(//div[contains(text(),'Divisional Price')])[1]/..//following::td[5]/div");
     private final By divisionalPrice_Customer= By.xpath("(//div[contains(text(),'Divisional Price')])[1]/..//following::td[6]/div");
 
+    private final By webPrice_ValidFrom= By.xpath("(//div[contains(text(),'Web Price')])[1]/..//following::td[4]/div");
+    private final By webPrice_ValidTo= By.xpath("(//div[contains(text(),'Web Price')])[1]/..//following::td[5]/div");
+
 
 
     public PricePage sortPriceByValidFrom() {

@@ -7,7 +7,9 @@ import com.pim.enums.LogType;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.pim.reports.FrameworkLogger.log;
 
@@ -665,6 +667,26 @@ public class JsonVerificationUtils {
 		}
 		return extraHeaders;
 	}
+	public static List<String> getWebPriceExtraHeadersFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return Collections.emptyList();
+		List<String> extraHeaders = new ArrayList<>();
+		Map<String, String> headerPaths = new LinkedHashMap<>();
+		headerPaths.put("UOM", "$.DivisionalPrices[*].UOM");
+		headerPaths.put("Package_Quantity", "$.DivisionalPrices[*].Package_Quantity");
+		headerPaths.put("MinQuantity", "$.DivisionalPrices[*].MinQuantity");
+		for (Map.Entry<String, String> entry : headerPaths.entrySet()) {
+			try {
+				List<Object> values = ctx.read(entry.getValue());
+				if (values != null && !values.isEmpty()) {
+					extraHeaders.add(entry.getKey());
+				}
+			} catch (Exception ignored) {
+			}
+		}
+		return extraHeaders;
+	}
 
 	public static List<String> getDivisionalPricesDivisionFromIPIM_Json(String jsonContent, String itemNumber) {
 		ReadContext ctx = JsonPath.parse(jsonContent);
@@ -701,6 +723,27 @@ public class JsonVerificationUtils {
 		List<String> extraHeaders = new ArrayList<>();
 		Map<String, String> headerPaths = new LinkedHashMap<>();
 		headerPaths.put("Competitor_Name", "$.Competitors[*].Competitor_Name");
+		for (Map.Entry<String, String> entry : headerPaths.entrySet()) {
+			try {
+				List<Object> values = ctx.read(entry.getValue());
+				if (values != null && !values.isEmpty()) {
+					extraHeaders.add(entry.getKey());
+				}
+			} catch (Exception ignored) {
+			}
+		}
+		return extraHeaders;
+	}
+
+	public static List<String> getReferencesExtraHeadersFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return Collections.emptyList();
+		List<String> extraHeaders = new ArrayList<>();
+		Map<String, String> headerPaths = new LinkedHashMap<>();
+		headerPaths.put("Effective_Date", "$.Product_References[*].Effective_Date");
+		headerPaths.put("Expiration_Date", "$.Product_References[*].Expiration_Date");
+		headerPaths.put("Sequence", "$.Product_References[*].Sequence");
 		for (Map.Entry<String, String> entry : headerPaths.entrySet()) {
 			try {
 				List<Object> values = ctx.read(entry.getValue());
@@ -841,7 +884,89 @@ public class JsonVerificationUtils {
 		return mediaDocumentId.isEmpty() ? null : mediaDocumentId;
 	}
 
+	// Fetch WebPrice Start_Date from iPIM Json
+	public static String getWebPriceStartDateFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		// Fetch Web Price Start_Date
+		List<String> startDates = ctx.read("$.WebPrices[*].Start_Date");
+		return startDates.isEmpty() ? null : mapDateToJsonFormat(startDates.get(0));
+	}
 
+	// Fetch WebPrice End_Date from iPIM Json
+	public static String getWebPriceEndDateFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+		// Fetch Web Price End_Date
+		List<String> endDates = ctx.read("$.WebPrices[*].End_Date");
+		return endDates.isEmpty() ? null : mapDateToJsonFormat(endDates.get(0));
+	}
+
+	// Utility to normalize dates into JSON format (yyyy-MM-dd)
+	public static String mapDateToJsonFormat(String dateValue) {
+		if (dateValue == null || dateValue.trim().isEmpty()) return null;
+
+		// Remove any time part if present
+		if (dateValue.contains(" ")) {
+			dateValue = dateValue.split(" ")[0];
+		}
+
+		// Check if already in yyyy-MM-dd format
+		if (dateValue.matches("\\d{4}-\\d{2}-\\d{2}")) {
+			return dateValue;
+		}
+
+		// If in MM/dd/yyyy or M/d/yyyy format
+		if (dateValue.contains("/")) {
+			String[] parts = dateValue.split("/");
+			if (parts.length == 3) {
+				String month = parts[0].length() == 1 ? "0" + parts[0] : parts[0];
+				String day = parts[1].length() == 1 ? "0" + parts[1] : parts[1];
+				String year = parts[2];
+				return year + "-" + month + "-" + day;
+			}
+		}
+		return dateValue;
+	}
+
+//	// Fetch References (Product_References)s from iPIM Json
+//	public static String getProductReferencesIDFromIPIM_Json(String jsonContent, String itemNumber) {
+//		ReadContext ctx = JsonPath.parse(jsonContent);
+//		// Ensure Product_Id matches
+//		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+//		// Fetch Target_Product_Id
+//		List<String> target_ProductID = ctx.read("$.Product_References[*].Target_Product_Id");
+//		return target_ProductID.isEmpty() ? null : target_ProductID.get(0);
+//	}
+//	public static String getProductReferencesTypeFromIPIM_Json(String jsonContent, String itemNumber) {
+//		ReadContext ctx = JsonPath.parse(jsonContent);
+//		// Ensure Product_Id matches
+//		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return null;
+//		// Fetch Reference_Type
+//		List<String> referenceType = ctx.read("$.Product_References[*].Reference_Type");
+//		return referenceType.isEmpty() ? null : referenceType.get(0);
+//	}
+
+	// Fetch References (Product_References)s from iPIM Json
+	public static List<String> getProductReferencesIDFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return Collections.emptyList();
+		// Fetch all Target_Product_Id
+		List<String> targetProductIDs = ctx.read("$.Product_References[*].Target_Product_Id");
+		return targetProductIDs.stream().filter(id -> id != null && !id.trim().isEmpty()).map(String::trim).collect(Collectors.toList());
+	}
+
+	public static List<String> getProductReferencesTypeFromIPIM_Json(String jsonContent, String itemNumber) {
+		ReadContext ctx = JsonPath.parse(jsonContent);
+		// Ensure Product_Id matches
+		if (!itemNumber.equals(ctx.read("$.Product_Id", String.class))) return Collections.emptyList();
+		// Fetch all Reference_Type
+		List<String> referenceTypes = ctx.read("$.Product_References[*].Reference_Type");
+		return referenceTypes.stream().filter(type -> type != null && !type.trim().isEmpty()).map(String::trim).collect(Collectors.toList());
+	}
 
 }
         

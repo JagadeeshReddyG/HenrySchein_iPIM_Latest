@@ -38,6 +38,7 @@ public class JsonVerificationPreRequsite extends BaseTest {
     public void verify_Product_Notes_JSON_Verification_US(Map<String, String> map) throws InterruptedException, IOException {
 
         FileUtils.storeCurrentTimeInJsonTimesPropertiesFile(map.get("TestCaseName")+map.get("itemNumber"));
+        FileUtils.storeCurrentTimeInJsonTimesPropertiesFile("verify_Divisional_Prices_JSON_Verification_US"+map.get("itemNumber"));
 
         PimHomepage pimHomepage = new LoginPage()
                 .enterUserName(ExcelUtils.getLoginData().get("US User").get("UserName"))
